@@ -4,13 +4,13 @@ This repository contains two versions of a YouTube Playlist Transfer tool, desig
 
 ## Folder Structure
 
-### 1. [Original Python Script](./My%20Python%20Script/)
+### 1. [Original Python Script](./FileTransferScript/)
 
 - The initial implementation.
 - Simple, direct, and functional.
 - Best for understanding the core logic of the YouTube API.
 
-### 2. [Refined AI-Assisted Script](./My%20Python%20Script%20(Debugged%20&%20Refined%20By%20AI)/)
+### 2. [Refined AI-Assisted Script](./EnhancedFileTransferScript/)
 
 - **Recommended version.**
 - Enhanced with better error handling and progress UI.
