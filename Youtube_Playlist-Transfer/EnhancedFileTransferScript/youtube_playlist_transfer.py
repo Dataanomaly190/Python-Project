@@ -9,7 +9,7 @@ Requirements:
 Setup:
     1. Go to https://console.cloud.google.com/
     2. Create a project → Enable "YouTube Data API v3"
-    3. Go to "Credentials" → Create OAuth 2.0 Client ID (Desktop App)
+    3. Go to "Credentials" → Create OAuth 2.0 Client ID
     4. Download the JSON and save as: client_secrets.json (in same folder as this script)
     5. Run: python youtube_playlist_transfer.py
 """
@@ -24,7 +24,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-# ─── CONFIG ─────────────────────────────────────────────────────────────────
+# CONFIG 
 
 CLIENT_SECRETS_FILE = "client_secrets.json"   # Your OAuth credentials JSON
 SCOPES = ["https://www.googleapis.com/auth/youtube"]
@@ -33,14 +33,13 @@ SCOPES = ["https://www.googleapis.com/auth/youtube"]
 SOURCE_TOKEN_FILE      = "token_source.pkl"
 DESTINATION_TOKEN_FILE = "token_destination.pkl"
 
-# Set to None to transfer ALL playlists, or provide a list of playlist IDs:
 # e.g. PLAYLIST_FILTER = ["PLxxxxxxx", "PLyyyyyyy"]
 PLAYLIST_FILTER = None
 
-# How long to wait (seconds) between API writes to avoid quota errors
+# Waiting time in seconds
 WRITE_DELAY = 0.5
 
-# ─── AUTH ────────────────────────────────────────────────────────────────────
+# AUTH
 
 def authenticate(token_file: str, account_label: str):
     """
@@ -55,21 +54,21 @@ def authenticate(token_file: str, account_label: str):
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            print(f"  🔄 Refreshing token for {account_label}...")
+            print(f"Refreshing token for {account_label}...")
             creds.refresh(Request())
         else:
-            print(f"\n🔐 Please log in with your {account_label} Google account.")
+            print(f"\n Please log in with your {account_label} Google account.")
             print("   A browser window will open. Complete the sign-in there.\n")
             flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
             creds = flow.run_local_server(port=0)
 
         with open(token_file, "wb") as f:
             pickle.dump(creds, f)
-        print(f"  ✅ Token saved for {account_label}.\n")
+        print(f"   Token saved for {account_label}.\n")
 
     return build("youtube", "v3", credentials=creds)
 
-# ─── FETCH ───────────────────────────────────────────────────────────────────
+# FETCH
 
 def get_all_playlists(youtube) -> list[dict]:
     """Fetches all playlists owned by the authenticated user."""
@@ -121,7 +120,7 @@ def get_playlist_videos(youtube, playlist_id: str) -> list[str]:
 
     return video_ids
 
-# ─── CREATE / INSERT ─────────────────────────────────────────────────────────
+# CREATE / INSERT 
 
 def create_playlist(youtube, title: str, description: str, privacy: str) -> str:
     """Creates a new playlist in the destination account and returns its ID."""
@@ -155,11 +154,11 @@ def add_video_to_playlist(youtube, playlist_id: str, video_id: str):
         }
     ).execute()
 
-# ─── MAIN TRANSFER ───────────────────────────────────────────────────────────
+# MAIN TRANSFER 
 
 def transfer_playlists():
     print("=" * 60)
-    print("   🎬  YouTube Playlist Transfer Tool")
+    print("YouTube Playlist Transfer Tool")
     print("=" * 60)
 
     # Step 1 — Authenticate both accounts
@@ -174,22 +173,22 @@ def transfer_playlists():
     all_playlists = get_all_playlists(src_yt)
 
     if not all_playlists:
-        print("  ⚠️  No playlists found in source account. Exiting.")
+        print("No playlists found in source account. Exiting.")
         return
 
     # Apply filter if set
     if PLAYLIST_FILTER:
         playlists = [p for p in all_playlists if p["id"] in PLAYLIST_FILTER]
-        print(f"  🎯 Filter applied — {len(playlists)} of {len(all_playlists)} playlists selected.")
+        print(f" Filter applied — {len(playlists)} of {len(all_playlists)} playlists selected.")
     else:
         playlists = all_playlists
-        print(f"  📋 Found {len(playlists)} playlist(s) to transfer:")
+        print(f" Found {len(playlists)} playlist(s) to transfer:")
 
     for i, pl in enumerate(playlists, 1):
         print(f"     {i:>2}. [{pl['privacy'][:3].upper()}] {pl['title']}  (id: {pl['id']})")
 
     print()
-    confirm = input("▶  Proceed with transfer? (yes/no): ").strip().lower()
+    confirm = input(" Proceed with transfer? (yes/no): ").strip().lower()
     if confirm not in ("yes", "y"):
         print("Transfer cancelled.")
         return
@@ -204,7 +203,7 @@ def transfer_playlists():
 
         # Fetch videos from source
         video_ids = get_playlist_videos(src_yt, pl["id"])
-        print(f"     📼  {len(video_ids)} video(s) found.")
+        print(f"       {len(video_ids)} video(s) found.")
 
         # Create matching playlist in destination
         try:
@@ -221,17 +220,17 @@ def transfer_playlists():
             try:
                 add_video_to_playlist(dst_yt, new_pl_id, vid_id)
                 ok += 1
-                print(f"        ➕ Added video {vid_id}  ({ok}/{len(video_ids)})")
+                print(f"         Added video {vid_id}  ({ok}/{len(video_ids)})")
             except HttpError as e:
                 failed += 1
                 err_reason = json.loads(e.content).get("error", {}).get("errors", [{}])[0].get("reason", str(e))
-                print(f"        ⚠️  Skipped {vid_id} — {err_reason}")
+                print(f"          Skipped {vid_id} — {err_reason}")
             time.sleep(WRITE_DELAY)   # Throttle writes
 
         summary.append((pl["title"], ok, failed, new_pl_id))
         print()
 
-    # ─── Summary ─────────────────────────────────────────────────────────────
+    # Summary 
     print("=" * 60)
     print("   ✅  TRANSFER COMPLETE — Summary")
     print("=" * 60)
@@ -248,7 +247,7 @@ def transfer_playlists():
     print(f"  Total videos transferred : {total_ok}")
     print(f"  Total videos skipped     : {total_fail}")
     print("=" * 60)
-    print("\n  💡 Skipped videos are usually private/deleted videos")
+    print("\n   Skipped videos are usually private/deleted videos")
     print("     that can't be added to another account's playlist.\n")
 
 
