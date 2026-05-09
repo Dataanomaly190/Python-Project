@@ -445,7 +445,7 @@ df = load_data()
 # ---------------- Sidebar Filters -------------------
 # =====================================================
 
-st.sidebar.header("🔎 Global Filters")
+st.sidebar.header("Filters")
 
 income_option = st.sidebar.selectbox("Income", ["All", "<=50K", ">50K"])
 sex_option = st.sidebar.selectbox("Gender", ["All"] + sorted(df["sex"].unique()))
@@ -475,7 +475,7 @@ filtered_df = filtered_df[
 # ---------------- Header & KPIs ---------------------
 # =====================================================
 
-st.title("👥 Adult Census — Income Analytics")
+st.title("Adult Census — Income Analytics")
 
 total_records = len(filtered_df)
 income_rate = filtered_df["income_binary"].mean() * 100 if total_records > 0 else 0
@@ -492,7 +492,7 @@ col4.metric("Avg Age", f"{avg_age:.2f}")
 # Download
 csv_buffer = io.StringIO()
 filtered_df.to_csv(csv_buffer, index=False)
-st.download_button("📥 Download Filtered Data",
+st.download_button("Download CSV",
                    csv_buffer.getvalue(),
                    "filtered_adult.csv",
                    "text/csv")
@@ -502,10 +502,10 @@ st.download_button("📥 Download Filtered Data",
 # =====================================================
 
 tab1, tab2, tab3, tab4 = st.tabs([
-    "📊 Demographics",
-    "🎓 Education & Work",
-    "🌍 Geographic",
-    "📈 Advanced Analytics"
+    "Demographics",
+    "Education & Work",
+    "Geographic",
+    "Advanced Analytics"
 ])
 
 # =====================================================

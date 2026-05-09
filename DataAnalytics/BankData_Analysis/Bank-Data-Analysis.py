@@ -497,7 +497,7 @@ df = load_data(r"C:\Users\Lakshya\Bank\bank-additional-full.xlsx")
 # ---------------- Sidebar Filters --------------------
 # =====================================================
 
-st.sidebar.header("🔎 Filters")
+st.sidebar.header("Filters")
 
 jobs = ["All"] + sorted(df['job'].dropna().unique().tolist())
 selected_job = st.sidebar.selectbox("Job", jobs)
@@ -550,7 +550,7 @@ csv_buffer = io.StringIO()
 filtered_df.to_csv(csv_buffer, index=False)
 
 st.download_button(
-    "Download Filtered Dataset",
+    "Download Dataset",
     csv_buffer.getvalue(),
     "bank_filtered.csv",
     "text/csv"
